@@ -17,23 +17,53 @@ const { Content } = Layout;
 const { Dragger } = Upload;
 
 
+const DEFAULT_STYLES = {
+    container: {
+        width: "40vw",
+        maxWidth: "100%",
+        height: '7vh'
+    },
+    searchContainer: {
+        height: "7vh",
+        borderRadius: "27px"
+    },
+    searchInput: {
+        paddingLeft: "45px",
+        paddingRight: "45px",
+        fontSize: "20px"
+    },
+    dragContainer: {
+        width: "100%"
+    }
+};
+
+
 const SearchComponent = ({
     image,
     setImage,
     audio,
     setAudio,
     searchValue,
-    setSearchValue
+    setSearchValue,
+    style = {}
 }) => {
     const navigate = useNavigate();
+
+    const mergedStyles = {
+        container: { ...DEFAULT_STYLES.container, ...style.container },
+        searchContainer: { ...DEFAULT_STYLES.searchContainer, ...style.searchContainer },
+        searchInput: { ...DEFAULT_STYLES.searchInput, ...style.searchInput },
+        dragContainer: { ...DEFAULT_STYLES.dragContainer, ...style.dragContainer }
+    };
 
     const SearchButton = (
         <Flex
             style={{
-                backgroundColor: "#fff",
+                // backgroundColor: "#fff",
                 borderLeft: "none",
                 height: "100%",
-                alignItems: "center"
+                alignItems: "center",
+                ...style.buttonGroup
             }}
             gap={10}
         >
@@ -45,7 +75,8 @@ const SearchComponent = ({
                         height: "36px",
                         borderRadius: "4px",
                         padding: 0,
-                        margin: 0
+                        margin: 0,
+                        ...style.imageButton
                     }}
                     icon={<ImageIcon style={{ fontSize: "20px" }} />}
                     onClick={() => setImage(prev => !prev)} />
@@ -58,7 +89,8 @@ const SearchComponent = ({
                         height: "36px",
                         borderRadius: "4px",
                         padding: 0,
-                        margin: 0
+                        margin: 0,
+                        ...style.audioButton
                     }}
                     icon={<AudioOutlined style={{ fontSize: "20px" }} />}
                     onClick={() => setAudio(prev => !prev)} />
@@ -99,18 +131,16 @@ const SearchComponent = ({
     return (
         <Suspense>
             <Row
-                justify={"center"}
+                justify={style.rowJustify || "center"}
                 style={{
-                    marginBottom: '3vh'
+                    marginBottom: style.rowMarginBottom || '3vh',
+                    ...style.rowContainer
                 }}
             >
                 <form
                     onSubmit={handleSearch}
                     style={{
-                        width: "40vw",
-                        maxWidth: "100%",
-                        marginTop: "30vh",
-                        height: '7vh'
+                        ...mergedStyles.container
                     }}
                 >
                     <div className="google-search-container" style={{
@@ -120,18 +150,20 @@ const SearchComponent = ({
                         height: "7vh",
                         borderRadius: "27px",
                         overflow: "hidden",
+                        ...mergedStyles.searchContainer,
                         boxShadow: "0 1px 6px rgba(32,33,36,0.15)",
                         border: "1px solid #dfe1e5",
-                        background: "#fff"
+                        // background: "#fff",
+                        ...style.searchContainer
                     }}>
                         <div className="search-icon" style={{
                             position: "absolute",
-                            left: "15px",
+                            left: style.iconLeft || "15px",
                             top: "50%",
                             transform: "translateY(-50%)",
                             color: "#9aa0a6"
                         }}>
-                            <SearchOutlined style={{ fontSize: "20px" }} />
+                            <SearchOutlined style={{ fontSize: style.iconSize || "20px" }} />
                         </div>
                         <input
                             id="search-input"
@@ -143,25 +175,25 @@ const SearchComponent = ({
                             style={{
                                 width: "100%",
                                 height: "100%",
-                                paddingLeft: "45px",
-                                paddingRight: "45px",
-                                borderRadius: "27px",
+                                ...mergedStyles.searchInput,
+                                borderRadius: style.inputRadius || "27px",
                                 border: "none",
                                 outline: "none",
                                 transition: "all 0.3s",
-                                fontSize: "20px"
+                                ...style.searchInput
                             }}
                         />
 
                         {/* 右侧按钮区域 */}
                         <div className="search-buttons" style={{
                             position: "absolute",
-                            right: "15px",
+                            right: style.buttonRight || "15px",
                             top: "50%",
                             transform: "translateY(-50%)",
                             display: "flex",
                             alignItems: "center",
-                            gap: "10px"
+                            gap: style.buttonGap || "10px",
+                            ...style.buttonContainer
                         }}>
                             {SearchButton}
                         </div>
@@ -169,13 +201,15 @@ const SearchComponent = ({
                 </form>
             </Row>
             <Row
-                justify={"center"}
+                justify={style.draggerRowJustify || "center"}
                 style={{
-                    width: "100%"
+                    width: "100%",
+                    ...style.draggerRowContainer
                 }}
             >
                 <Row
-                    justify={"center"}
+                    justify={style.draggerInnerRowJustify || "center"}
+                    style={style.draggerInnerRow}
                 >
                     {image && (
                         <Dragger {...draggerProps}>
@@ -190,7 +224,8 @@ const SearchComponent = ({
                     )}
                 </Row>
                 <Row
-                    justify={"center"}
+                    justify={style.audioDraggerRowJustify || "center"}
+                    style={style.audioDraggerRow}
                 >
                     {audio && (
                         <Dragger {...draggerProps}>

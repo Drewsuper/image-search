@@ -16,11 +16,11 @@ code {
   transition: all 0.3s;
 }
 
-.google-search-input:hover {
-  border-color: #bdc1c6;
+.google-search-container:hover {
+  border-color: #6cfaf1;
 }
 
-.google-search-input:focus {
-  border-color: #1a73e8;
-  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.3);
+.google-search-container:focus {
+  border-color: #fdfdfd;
+  box-shadow: 0 1px 6px rgba(76, 239, 220, 0.85);
 }

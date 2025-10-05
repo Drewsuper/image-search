@@ -26,6 +26,8 @@ const ResultPage = () => {
     const [currentPageSize, setCurrentPageSize] = useState(10);
     const [currentPage, setCurrentPage] = useState(1);
     const [count, setDataCount] = useState(0);
+    const [image, setImage] = useState(false);
+    const [audio, setAudio] = useState(false);
 
 
     const query = searchParam.get("s") || "";
@@ -38,24 +40,24 @@ const ResultPage = () => {
         }, 400);
     }, []);
 
-    const getPageData = async (page,pagesize)=>{
-        const res = await fetch.post("",JSON.stringify({page:page,pagesize:pagesize}));
+    const getPageData = async (page, pagesize) => {
+        const res = await fetch.post("", JSON.stringify({ page: page, pagesize: pagesize }));
         return res
     }
 
-    const handlePageChange = async (page,pageSize) => {
+    const handlePageChange = async (page, pageSize) => {
         let res
         if (pageSize === currentPage) {
-            res = await getPageData(page,pageSize);
-        }else{
+            res = await getPageData(page, pageSize);
+        } else {
             setCurrentPageSize(pageSize);
             setCurrentPage(1);
-            res = await getPageData(1,pageSize);
+            res = await getPageData(1, pageSize);
         }
         if (res.data.code === 200) {
             setResults(res.data.data.data);
             setDataCount(res.data.data.count);
-        }else{
+        } else {
             setResults([]);
             setDataCount(0);
         }
@@ -65,7 +67,7 @@ const ResultPage = () => {
         <Content
             style={{
                 height: "100%",
-                backgroundColor: "#fff",
+                paddingTop: "2vh"
             }}>
             <Helmet>
                 <title>
@@ -73,11 +75,38 @@ const ResultPage = () => {
                 </title>
             </Helmet>
             <div style={{ padding: "0 1vw" }}>
-                <div style={{ marginBottom: "20px", width:"50vw", height:"5vh" }}>
-                    
-                </div>
+                <SearchComponent
+                    image={image}
+                    setImage={() => setImage(prev => !prev)}
+                    audio={audio}
+                    setAudio={() => { setAudio(prev => !prev) }}
+                    searchValue={query}
+                    setSearchValue={(e) => query = e.target.value}
+                    style={{
+                        container: {
+                            width: "40vw",
+                            marginTop: "0",
+                            height: "5vh"
+                        },
+                        searchContainer: {
+                            height: "5vh",
+                            borderRadius: "20px"
+                        },
+                        searchInput: {
+                            paddingLeft: "40px",
+                            fontSize: "14px"
+                        },
+                        buttonSize: "28px",
+                        iconSize: "16px",
+                        iconLeft: "12px",
+                        buttonRight: "12px",
+                        rowJustify: "start",
+                        rowMarginBottom: "0",
+                        draggerRowJustify: 'start'
+                    }}
+                />
 
-                <div style={{ marginBottom: "30px" }}>
+                <div style={{ marginTop: '1vh', marginBottom: "3vh" }}>
                     <h1 style={{ fontSize: "24px", margin: 0 }}>
                         "{query}" 的搜索结果
                     </h1>
@@ -133,7 +162,7 @@ const ResultPage = () => {
                     </div>
                 )}
                 <Pagination
-                    style={{fontSize: "18px"}}
+                    style={{ fontSize: "18px" }}
                     align="center"
                     total={count}
                     current={currentPage}
@@ -141,9 +170,9 @@ const ResultPage = () => {
                     pageSizeOptions={[
                         10, 20, 30, 50
                     ]}
-                    showTotal={(total,range) => `共${total}条数据，当前${range[0]} - ${range[1]}`}
+                    showTotal={(total, range) => `共${total}条数据，当前${range[0]} - ${range[1]}`}
                     hideOnSinglePage
-                onChange={handlePageChange}
+                    onChange={handlePageChange}
                 />
             </div>
         </Content>

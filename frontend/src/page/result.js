@@ -10,7 +10,6 @@ import {
 } from "antd";
 import { Suspense, useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
-import CricleLoadingPage from "../components/layout/CircleLoading";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import SearchComponent from "../components/common/Search";
 import { getRandomTip } from "../components/common/TipMessage";
@@ -36,7 +35,7 @@ const ResultPage = () => {
         setResults([...[...Array(10)].map((_, index) => { return { id: index + 1, imageUrl: "https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png" } })])
         setTimeout(() => {
             setIsLoading(false);
-        }, 100000);
+        }, 1000);
     }, []);
 
     const getPageData = async (page, pagesize) => {

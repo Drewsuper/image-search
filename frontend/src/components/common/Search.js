@@ -6,7 +6,8 @@ import {
     Flex,
     Row,
     message,
-    Tooltip
+    Tooltip,
+    Space
 } from "antd";
 import { AudioOutlined, SearchOutlined, InboxOutlined } from "@ant-design/icons";
 import { ImageIcon } from "../icon/icon";
@@ -79,7 +80,7 @@ const SearchComponent = ({
                         ...style.imageButton
                     }}
                     icon={<ImageIcon style={{ fontSize: "20px" }} />}
-                    onClick={() => setImage(prev => !prev)} />
+                    onClick={() => { setImage(prev => !prev); setAudio(false) }} />
             </Tooltip>
             <Tooltip title={"语音搜索"}>
                 <Button
@@ -93,7 +94,7 @@ const SearchComponent = ({
                         ...style.audioButton
                     }}
                     icon={<AudioOutlined style={{ fontSize: "20px" }} />}
-                    onClick={() => setAudio(prev => !prev)} />
+                    onClick={() => { setAudio(prev => !prev); setImage(false) }} />
             </Tooltip>
         </Flex>
     );
@@ -129,7 +130,10 @@ const SearchComponent = ({
     };
 
     return (
-        <Suspense>
+        <Space
+            direction="vertical"
+            size={10}
+        >
             <Row
                 justify={style.rowJustify || "center"}
                 style={{
@@ -153,7 +157,6 @@ const SearchComponent = ({
                         ...mergedStyles.searchContainer,
                         boxShadow: "0 1px 6px rgba(32,33,36,0.15)",
                         border: "1px solid #dfe1e5",
-                        // background: "#fff",
                         ...style.searchContainer
                     }}>
                         <div className="search-icon" style={{
@@ -200,47 +203,36 @@ const SearchComponent = ({
                     </div>
                 </form>
             </Row>
-            <Row
-                justify={style.draggerRowJustify || "center"}
-                style={{
-                    width: "100%",
-                    ...style.draggerRowContainer
-                }}
+
+            <Flex
+                justify="center"
+                align="center"
             >
-                <Row
-                    justify={style.draggerInnerRowJustify || "center"}
-                    style={style.draggerInnerRow}
-                >
-                    {image && (
-                        <Dragger {...draggerProps}>
-                            <p className="ant-upload-drag-icon">
-                                <InboxOutlined />
-                            </p>
-                            <p className="ant-upload-text">点击或拖拽文件到此区域上传</p>
-                            <p className="ant-upload-hint">
-                                禁止上传公司数据或其他违禁文件。
-                            </p>
-                        </Dragger>
-                    )}
-                </Row>
-                <Row
-                    justify={style.audioDraggerRowJustify || "center"}
-                    style={style.audioDraggerRow}
-                >
-                    {audio && (
-                        <Dragger {...draggerProps}>
-                            <p className="ant-upload-drag-icon">
-                                <InboxOutlined />
-                            </p>
-                            <p className="ant-upload-text">点击或拖拽文件到此区域上传</p>
-                            <p className="ant-upload-hint">
-                                禁止上传公司数据或其他违禁文件。
-                            </p>
-                        </Dragger>
-                    )}
-                </Row>
-            </Row>
-        </Suspense>
+                {image && (
+                    <Dragger {...draggerProps}>
+                        <p className="ant-upload-drag-icon">
+                            <InboxOutlined />
+                        </p>
+                        <p className="ant-upload-text">点击或拖拽文件到此区域上传</p>
+                        <p className="ant-upload-hint">
+                            禁止上传公司数据或其他违禁文件。
+                        </p>
+                    </Dragger>
+                )}
+
+                {audio && (
+                    <Dragger {...draggerProps}>
+                        <p className="ant-upload-drag-icon">
+                            <InboxOutlined />
+                        </p>
+                        <p className="ant-upload-text">点击或拖拽文件到此区域上传</p>
+                        <p className="ant-upload-hint">
+                            禁止上传公司数据或其他违禁文件。
+                        </p>
+                    </Dragger>
+                )}
+            </Flex>
+        </Space>
     )
 };
 

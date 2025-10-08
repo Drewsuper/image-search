@@ -1,19 +1,19 @@
 import {
-    Button,
     Typography,
     Layout,
     Skeleton,
-    List,
     Card,
     Empty,
-    Pagination
+    Pagination,
+    Image,
+    Flex
 } from "antd";
 import { Suspense, useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
 import CricleLoadingPage from "../components/layout/CircleLoading";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import Search from "antd/es/transfer/search";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import SearchComponent from "../components/common/Search";
+import { getRandomTip } from "../components/common/TipMessage";
 
 const { Paragraph } = Typography;
 const { Content } = Layout;
@@ -28,22 +28,21 @@ const ResultPage = () => {
     const [count, setDataCount] = useState(0);
     const [image, setImage] = useState(false);
     const [audio, setAudio] = useState(false);
-
-
-    const query = searchParam.get("s") || "";
+    const [query, setQuery] = useState();
 
 
     useEffect(() => {
-
+        setQuery(searchParam.get("s") || "");
+        setResults([...[...Array(10)].map((_, index) => { return { id: index + 1, imageUrl: "https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png" } })])
         setTimeout(() => {
             setIsLoading(false);
-        }, 400);
+        }, 100000);
     }, []);
 
     const getPageData = async (page, pagesize) => {
         const res = await fetch.post("", JSON.stringify({ page: page, pagesize: pagesize }));
         return res
-    }
+    };
 
     const handlePageChange = async (page, pageSize) => {
         let res
@@ -61,27 +60,55 @@ const ResultPage = () => {
             setResults([]);
             setDataCount(0);
         }
-    }
+    };
+
+    const SkeletonItem = () => {
+        return (
+            <Card
+                style={{
+                    boxShadow: "none",
+                    transition: "all 0.3s"
+                }}
+                hoverable
+                cover={
+                    <Skeleton.Image
+                        active
+                        style={{
+                            width: "15vw",
+                            minHeight: " 30vh",
+                            maxHeight: "40vh",
+                            objectFit: "cover",
+                        }}
+                    />
+                }
+            >
+                <Paragraph
+                    style={{ color: "#4d515e", fontSize: "14px" }}
+                >
+                    {getRandomTip()}
+                </Paragraph>
+            </Card>
+        )
+    };
 
     return (
         <Content
             style={{
-                height: "100%",
-                paddingTop: "2vh"
+                padding: "2vh 2vw 5vh 2vw"
             }}>
             <Helmet>
                 <title>
                     {`${query}搜索结果`}
                 </title>
             </Helmet>
-            <div style={{ padding: "0 1vw" }}>
+            <div>
                 <SearchComponent
                     image={image}
-                    setImage={() => setImage(prev => !prev)}
+                    setImage={setImage}
                     audio={audio}
-                    setAudio={() => { setAudio(prev => !prev) }}
+                    setAudio={setAudio}
                     searchValue={query}
-                    setSearchValue={(e) => query = e.target.value}
+                    setSearchValue={setQuery}
                     style={{
                         container: {
                             width: "40vw",
@@ -102,65 +129,85 @@ const ResultPage = () => {
                         buttonRight: "12px",
                         rowJustify: "start",
                         rowMarginBottom: "0",
-                        draggerRowJustify: 'start'
                     }}
                 />
-
-                <div style={{ marginTop: '1vh', marginBottom: "3vh" }}>
+                <div style={{ marginTop: '2vh' }}>
                     <h1 style={{ fontSize: "24px", margin: 0 }}>
                         "{query}" 的搜索结果
                     </h1>
-                    <div style={{ color: "#666", marginTop: "8px" }}>
+                    <div style={{ color: "#666", marginTop: "1vh" }}>
                         共找到约 {results.length} 条结果（{isLoading ? '加载中...' : '已加载'})
                     </div>
                 </div>
-
-                {isLoading ? (
-                    <CricleLoadingPage style={{ width: "100%", height: "70vh" }} />
-                ) : results.length === 0 ? (
-                    <Empty
-                        description={`没有找到与 "${query}" 相关的结果`}
-                        style={{ padding: "40px 0" }}
-                    >
-                        <Button type="primary" onClick={() => navigate("/")}>
-                            修改搜索词
-                        </Button>
-                    </Empty>
-                ) : (
-                    <div>
-                        <List
-                            itemLayout="vertical"
-                            size="large"
-                            dataSource={results}
-                            renderItem={item => (
-                                <List.Item key={item.id} style={{ padding: "16px 0" }}>
+                <div
+                    style={{
+                        marginTop: "4vh",
+                        padding: '0 4vw'
+                    }}
+                >
+                    {isLoading ? (
+                        <Flex
+                            gap={"3vw"}
+                            wrap
+                            style={{
+                                maxWidth: '100%'
+                            }}
+                        >
+                            {
+                                [...Array(currentPageSize)].map((_, index) => (
+                                    <SkeletonItem key={`skeletion-${index}`} />
+                                ))
+                            }
+                        </Flex>
+                    ) : results.length === 0 ? (
+                        <Empty
+                            description={`没有找到与 "${query}" 相关的结果`}
+                            style={{ padding: "40px 0" }}
+                        >
+                        </Empty>
+                    ) : (
+                        <Flex
+                            wrap
+                            gap={"3vw"}
+                            style={{
+                                maxWidth: "100%"
+                            }}
+                        >
+                            {
+                                results.map(item => (
                                     <Card
                                         bordered={false}
                                         style={{
                                             boxShadow: "none",
-                                            transition: "all 0.3s",
-                                            cursor: "pointer"
+                                            transition: "all 0.3s"
                                         }}
                                         hoverable
+                                        cover={
+                                            item.imageUrl && <Image
+                                                src={item.imageUrl}
+                                                alt={item.title}
+                                                loading="lazy"
+                                                style={{
+                                                    width: "15vw",
+                                                    minHeight: " 30vh",
+                                                    maxHeight: "40vh",
+                                                    objectFit: "cover",
+                                                }}
+                                            />
+                                        }
                                     >
-                                        <a href={item.url} style={{ color: "#1a0dab", fontSize: "18px", textDecoration: "none" }}>
-                                            {item.title}
-                                        </a>
-                                        <div style={{ color: "#5f6368", fontSize: "14px", marginTop: "4px" }}>
-                                            {item.url.replace(/^https?:\/\//, '')}
-                                        </div>
                                         <Paragraph
-                                            ellipsis={{ rows: 2, expandable: false }}
-                                            style={{ color: "#4d515e", marginTop: "8px", fontSize: "14px" }}
+                                            style={{ color: "#4d515e", fontSize: "14px" }}
                                         >
                                             {item.description}
                                         </Paragraph>
                                     </Card>
-                                </List.Item>
-                            )}
-                        />
-                    </div>
-                )}
+                                )
+                                )
+                            }
+                        </Flex>
+                    )}
+                </div>
                 <Pagination
                     style={{ fontSize: "18px" }}
                     align="center"

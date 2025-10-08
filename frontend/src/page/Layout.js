@@ -14,9 +14,9 @@ const LayoutPage = () => {
     const { isDark, chanageTheme } = useTheme();
 
     return (
-        <Layout style={{ height: "100vh", width: "100vw" }}>
+        <Layout style={{ width: "100%" }}>
             {/* <HeaderPage /> */}
-            <Content style={{ width: "100vw", height: "80vh" }}>
+            <Content style={{ width: '100%', minHeight: "90vh" }}>
                 <Outlet />
             </Content>
             {/* <FloatButton.Group>

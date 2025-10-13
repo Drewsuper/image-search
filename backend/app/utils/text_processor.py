@@ -5,8 +5,8 @@ from sentence_transformers import SentenceTransformer
 import torch
 
 
-reader = easyocr.Reader(['en', 'ch_sim'], gpu=torch.cuda.is_available())
-text_model = SentenceTransformer('all-MiniLM-L6-v2')
+reader = easyocr.Reader(['en'], gpu=torch.cuda.is_available(), download_enabled=False)
+text_model = SentenceTransformer('C:\\Users\\wangy\\.cache\\huggingface\\hub\\models--sentence-transformers--all-MiniLM-L6-v2\\snapshots\\c9745ed1d9f207416be6d2e6f8de32d1f16199bf', local_files_only=True)
 
 def extract_text_segments(video_paths, query_text, similarity_threshold=0.7, min_length=30, sample_rate=5):
    

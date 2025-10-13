@@ -5,13 +5,11 @@ from ultralytics import YOLO
 from torchvision import transforms
 from app.models.mobilefacenet import MobileFaceNet
 
-
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 yolo_model = YOLO("yolov8n-face-lindevs.pt")
 face_model = MobileFaceNet().to(device)
 face_model = torch.jit.load("save_model/mobilefacenet.pth", map_location=device)
 face_model.eval()
-
 
 transform = transforms.Compose([
     transforms.ToPILImage(),
@@ -20,31 +18,32 @@ transform = transforms.Compose([
     transforms.Normalize([0.5], [0.5])
 ])
 
-
 def load_target_face(target_image_path):
-    
     target_image = cv2.imread(target_image_path)
+    target_image = cv2.cvtColor(target_image, cv2.COLOR_BGR2RGB)
     faces_detected = yolo_model.predict(target_image, imgsz=640, conf=0.5, verbose=False)
 
     if len(faces_detected[0].boxes) == 0:
         raise ValueError("未检测到目标人脸")
 
+    print(f"Detected {len(faces_detected[0].boxes)} face(s) in target image")
     x1, y1, x2, y2 = map(int, faces_detected[0].boxes.xyxy[0].cpu().numpy())
     face_crop = target_image[y1:y2, x1:x2]
+    face_crop = cv2.cvtColor(face_crop, cv2.COLOR_BGR2RGB)
 
     with torch.no_grad():
         face_tensor = transform(face_crop).unsqueeze(0).to(device)
         target_embedding = face_model(face_tensor).cpu().numpy()
+        print(f"Target face embedding shape: {target_embedding.shape}")
 
     return target_embedding
 
-
-def extract_face_segments(video_paths, target_image_path, threshold=0.5, min_length=30, batch_size=16):
-    
+def extract_face_segments(video_paths, target_image_path, threshold=1.0, min_length=30, batch_size=16):
     target_embedding = load_target_face(target_image_path)
     results = {}
 
     for video_path in video_paths:
+        print(f"Processing video: {video_path}")
         cap = cv2.VideoCapture(video_path)
         fps = cap.get(cv2.CAP_PROP_FPS)
         frame_count = 0
@@ -65,6 +64,7 @@ def extract_face_segments(video_paths, target_image_path, threshold=0.5, min_len
 
                 for i, result in enumerate(faces_detected):
                     boxes = result.boxes.xyxy.cpu().numpy()
+                    print(f"Frame {frame_indices[i]}: Detected {len(boxes)} face(s)")
                     matched = False
                     for box in boxes:
                         x1, y1, x2, y2 = map(int, box[:4])
@@ -73,7 +73,8 @@ def extract_face_segments(video_paths, target_image_path, threshold=0.5, min_len
                             with torch.no_grad():
                                 face_tensor = transform(face_crop).unsqueeze(0).to(device)
                                 embedding = face_model(face_tensor).cpu().numpy()
-                            distance = np.linalg.norm(embedding - target_embedding)
+                                distance = np.linalg.norm(embedding - target_embedding)
+                                print(f"Face at ({x1}, {y1}, {x2}, {y2}), Distance: {distance}")
                             if distance < threshold:
                                 matched = True
                                 break
@@ -94,8 +95,8 @@ def extract_face_segments(video_paths, target_image_path, threshold=0.5, min_len
             matched_segments.append(current_segment)
         cap.release()
 
-       
         matched_segments = [(start / fps, end / fps) for start, end in matched_segments if end - start >= min_length]
+        print(f"Matched segments before filter: {matched_segments}")
         if matched_segments:
             results[video_path] = matched_segments
 
